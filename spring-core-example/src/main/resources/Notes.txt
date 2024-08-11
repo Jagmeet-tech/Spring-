@@ -50,3 +50,4 @@ IOC and DI:
    2) Field injection :- Using @Autowired. Gets the object of that class using Reflection API (not safe)
    3) Setter / Method injection :- Using @Autowired. Gets the object of that class using Reflection API (not safe)
 
+-> Reflection API -> Not safe because, it will insert values in private data members also.
