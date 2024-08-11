@@ -1,0 +1,51 @@
+Spring Boot:-
+-> Auto configurations (ex:- springmvc)
+-> Automatic server embeed like Tomcat.
+-> Automatic child dependency management (ex:springmvc).
+-> Rapid development in comparison to Spring , where we need to manually configure these things and write busines logic.
+-> "spring-boot-starter":- minimal dependency required for spring boot.
+-> <exclusions> :- we can define the dependencies which we don't want to include.
+-> SpringApplication.run(myclassname,args) :- This spring class has static run method which executes/ bootstraps our class / application. It returns ConfigurableApplicationContext
+   which is child of ApplicationContext . (Spring container) and it will help to get the beans/objects using getBean(class_literal) method.
+
+-> class_literal:- Its just class path.
+-> @SpringBootApplication annotation is present in main class. (combination of these three annoations)
+    @SpringBootApplication = @Configuration + @ComponentScan(basepackage = {"current_main_class_package_included"}) + @EnableAutoConfiguration annotations
+
+-> @EnableAutoConfiguration:- annotation used to automatically detect any new confgurations/components within scanned packages.
+-> We can give names to beans / objects as well.
+-> We can generate multiple beans of same class in spring container as well. (By giving different names in @Bean(name) and @Component(name) annotations)
+   and by default if no name is given then , it picks Class name as it is in camelcase.
+
+-> But intersting thing is that , if we have created multiple beans of same class , then during injection (constructor,setter,field) which bean will get injected.
+   Spring container will unable to decide himself and throw error. Error:- (Parameter 0 of constructor in org.example.spring_boot_core.comp.Father required a single bean, but 3 were found)
+   (because three student beans was found student45 in class itself and student1,student2 in AppConfig class) and the type of these 3 beans are same "Student".(as it checks the type).
+
+-> So in order to resolve this issue, we came up with "Qualifier" concept. @Qualifier(name) :- Here in argument , I can pass bean name. This annotation is used during injection as this error will arise
+   at that time only.
+
+-> @Qualifier annotation will helping in which bean to inject if multiple bean of same classes were there.
+
+
+Loose Coupling :-
+-> Changing the implementation(behaviour), without effecting the code (actual classes).
+-> Using interfaces and classes we can achieve this concept.
+-> Ex:- Initially we are using Mysql db to fetch the items, but now I want Oracle db to do so. So without effecting the code (no tight coupling) we can achieve this.
+   (Think we have a controller which uses service class -> (business logic related criteria's to use repository) and get data from DB. We can change/add more service classes in future but since service class is injected
+   in controller, we have to take care that changing service would not require any code related changes in controller as well.)
+
+-> Since we are using interface and we can't create bean / object of an interface, so we need to create bean of its implementation classes. use @Component, @Bean for them.
+-> But since there could be many implementations of an interface, so its creates conflict/confusion to which implementation to inject or use.
+-> You can make any service class primary / default using @Primary annotation at the top of anyone Service class. Or another way is to use @Qualifier during injection and decide which service to use.
+
+Bean Scopes:- Use @Scope("prototype") :- annotation to mention the scopes
+-> Scope:- Boundary (access region)
+    1) Singleton:- Single object instance for each spring IOC container. (during each injection , we get same object reference)  -> default
+    2) Prototype:- any number of object instances. (during each injection , will create new object reference)
+    3) Request:- Scopes a single bean definition to the lifecycle of a single HTTP request. Each Http request has its own instance of bean created. (only valid in context of web-aware Spring Application Context)
+    4) Session:- Scopes a single bean definition to the lifecycle of an Http session. (only valid in context of web-aware Spring Application Context)
+    5) Application:- Scopes a single bean definition to the lifecycle of a ServletContext. (only valid in context of web-aware Spring Application Context)
+    6) WebSocket:- Scopes a single bean definition to the lifecycle of websocket.  (only valid in context of web-aware Spring Application Context)
+
+-> How we can use both annotation and XML based configuration (mixed) in single project to create beans (without creating two different ApplicationContext)
+   (Use @ImportResource(classpath:config.xml) annotation in any configuration class of java ex: AppConfig so that it could import resource(xml) and genrates bean/ objects related to that as well.)
