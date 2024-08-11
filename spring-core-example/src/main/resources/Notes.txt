@@ -1,0 +1,52 @@
+Spring Framework:-
+
+-> Used to build enterprise level/grade applications.
+-> Follows MVC architecture.
+-> Main feature is IOC (Inversion of Control) and DI (Dependency Injection).
+-> Maven :- Project management tool used for dependency management (pom.xml -> project object model), build process, Plugins. It has repository in online thorugh which we can dowload dependies.(similar like composer.json,package.json)
+
+--------------------------------------------------------------------------------------
+IOC and DI:
+    When a class is dependent on another class, then class needs to create object of dependent class byself by using "new" keyword. Also
+    that class needs to manage dependent object lifecycle (creation,injection,destruction) and sometimes it creates tight coupling. Ex: Car class depends on wheel class.
+
+    Either the class need to create object of that dependent class within themselves or developer from main function need to pass dependent class object in constructor
+    but still tight coupling and object passing is manually. Also there could be many dependencies that could there in class, so for that do we need to always changes parameter of constuctor
+    and pass that through main class.(not good way) . "We need someone to manage injection/control of objects that we are dependent on".
+
+    So in order to resolve this issue, we have given this control from developer to framework (Spring container / Object manager). It is simply a program
+    which manages object lifecycle and injects the dependent object on the classes required based on configuration file. This config. file could be in "XML"
+    format or meta-data "annotation" way. This config file will tell spring container about which objects/beans will manage by him. In config file , where I am defining bean, I can also write arguments/properties which i need to receive in bean class.
+
+    The objects which spring container manages are called "beans".
+
+-> GroupId (package name) unique :- ex:- com.live.batch / org.example
+-> Artifact id (project name) :- ex:- spring-core-example
+-> Maven Repository:- (dependency)
+    spring-core:- Basic building block for Spring that in conjunction with Spring Beans provides dependency injection and IoC features.
+    spring-beans:- Spring Beans provides the configuration framework and basic functionality to instantiate, configure, and assemble java objects.
+    spring-context:- Spring Context provides access to configured objects like a registry (a context). It inherits its features from Spring Beans and adds support for internationalization, event propagation, resource loading, and the transparent creation of contexts.
+                     (spring-context contains spring-core and spring-beans as nested dependencies. So only include spring-context is enough)
+
+-> ApplicationContext:- It is an interface used to get spring container so that we can get all beans/ objects present in that container. (Earlier BeanFactory was used which is now depreciated).
+-> ClassPathXMLApplicationContext(path):- Used to load xml configuration in spring container so that we can get beans. (Relative path should be there and try to put files under resources folder as it picks classpath based on that in maven)
+
+-> Another way to configure bean without xml is to use java based configuration class.
+    Define a java class and annotate it with @Configuration so that the class would be treated as configuration class.
+    In this class , define methods and annonate them with @Bean , so that the value/ object which it returning will be treated as bean and spring container would manage them.
+    Use "AnnotationConfigApplicationContext" class for passing your AppConfig java file and get all the beans.
+
+-> Use "@Component" at top of class so that this single annotation will treat a class as a bean without using @Configuration and @Bean annotaion. But this class have to be accessible/ scanned by spring.
+   For that in AppConfig configuration file , use @ComponentScan(basePackages = {"org.example.components"}) and pass the packages where you need components to be scanned so that we can access beans from anywhere.
+
+-> Spring Container stores all the object and based on the constructor arguments, it identifies whether this class is injected or not (if available).
+   Also if @Autowired annotation is used on the field and method , spring container injects the object.
+   Constructor Injection does not require @Autowired annotaion (automatic injection), only with field and method required. (if needed and available in spring)
+
+-> Spring Container will have the objects based on above strategies mentioned, but in order to inject it in the classes, either we have to use constructor or use @Autowired annotation.
+
+-> Types of Injection:-
+   1) Constructor injection:- Use constructor of that class to inject object. (preferred)
+   2) Field injection :- Using @Autowired. Gets the object of that class using Reflection API (not safe)
+   3) Setter / Method injection :- Using @Autowired. Gets the object of that class using Reflection API (not safe)
+
