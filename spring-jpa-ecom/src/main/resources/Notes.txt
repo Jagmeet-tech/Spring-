@@ -1,0 +1,304 @@
+Notes:-  JPA (Java Persistence API)
+1. JPA is specification that simplifes object-relational mapping (ORM) in java applications.
+2. It provides standard way to map java classes  (entities / models) to database tables and perform CRUD operations.(earlier in spring jdbc , we are doing CRUD operations manually, but now we have delegated this task to ORM like frameworks.)
+
+3.Features:- Key Features of JPA:
+             a) Object-Relational Mapping (ORM): JPA enables the mapping of Java objects to database tables. You define entity classes that correspond to database tables, and JPA
+                                                                         handles the conversion between the two.
+             b) Entity Management: JPA provides an EntityManager interface for managing the lifecycle of entity instances, such as persisting, merging, removing, and finding entities.
+             c) JPQL (Java Persistence Query Language): JPA includes its own query language (JPQL) that allows you to write queries based on the entity model rather than directly on the
+                                                                        database tables.
+             d) Annotations: JPA uses annotations to define entity classes and their mappings to database tables and columns. Common annotations include @Entity, @Table, @Id, and
+                                                                        @Column.
+             e) Transaction Management: JPA integrates with Java's transaction management facilities, allowing you to define transactional boundaries for operations.
+             f) Caching: JPA supports caching mechanisms to improve performance by reducing the number of database queries.
+
+4. ORM will take care of SQL queries and CRUD as we only need to write java code.
+5. JPA uses annotations,spring-data repositories eliminating the need of manual SQL.
+6. JPA simplifies data access logic by focusing on enitites and relationships.
+7. Spring JDBC code might need code changes when switching database due to SQL dialects (rules for specific software like oracle,MySQL).
+8.JPA works with various databases through JPA data providers requiring minimal code modifications. (as ORM is performing db operations , so it knows which dialects to use for formation of queries.)
+9. Automatic Query generations:- Spring data JPA generates queries based on method names.
+10. JPA vs Hibernate:
+              a)  Definition:-
+                        JPA: A specification for object-relational mapping (ORM) in Java. It defines a standard interface and set of guidelines for persisting Java objects to relational databases.
+                        Hibernate: An implementation of the JPA specification (though it also offers features beyond JPA). It is a popular ORM framework that provides tools to manage relational
+                        data in Java applications.
+              b) Purpose:
+                       JPA: Focuses on providing a standard way to interact with databases through Java objects. It defines the API for ORM and manages the entity lifecycle.
+                       Hibernate: Provides the actual functionality to map Java classes to database tables and includes advanced features for performance, caching, and transaction
+                       management.
+               c) Specification vs. Implementation:
+                       JPA: Being a specification, it defines what needs to be done but not how to do it. It can be implemented by different frameworks (like Hibernate, EclipseLink, etc.).
+                       Hibernate: As an implementation of JPA, it provides the concrete behavior and additional features beyond the JPA standard.
+                d) JPA: Offers a basic set of features for ORM, including entity management, JPQL (Java Persistence Query Language), and annotations.
+                            Hibernate: Provides many advanced features, such as:
+                                                   Built-in caching (first-level and second-level caching)
+                                                   Support for criteria queries
+                                                   Batch processing
+                                                   Better performance tuning options
+                                                   Support for complex relationships (e.g., inheritance, collections)
+11. application.properties is like environment file where we define specific environment related application properties.
+12. Spring boot automatically sets the driver and dialet based on pom.xml dependencies.
+13. "spring.jpa.hibernate.ddl-auto" property in a Spring Boot application is used to configure the behavior of the Hibernate ORM when it comes to handling the database schema. This property specifies how Hibernate should manage the schema generation and updating based on your JPA entity classes.
+     Possible Values for spring.jpa.hibernate.ddl-auto
+     - none: No schema management will be performed. This is the default behavior if the property is not set.
+     - validate: Hibernate will validate the existing schema against the entity mappings. It will not make any changes to the schema but will throw an error if the schema does not match the entities.
+     - update: Hibernate will update the existing database schema to match the entity mappings. It will try to make necessary changes without dropping existing data.
+     - create: Hibernate will create the database schema based on the entity mappings. If the schema already exists, it will be dropped first, and then recreated. This is useful for development but can lead to data loss if used in production.
+     - create-drop: Similar to create, but the schema will be dropped when the SessionFactory is closed (e.g., when the application stops). This is also useful for testing scenarios.
+
+14. @Entitiy:- Java class which represents database table in db. (Note:- the classes / packages need to be identified / scanned by spring boot in order to inject its objects wherever needed.)
+15. @Table:- By default table name is same as entity java class name, but we can change it using @Table(name="") annotation.
+16. @Id :- It is used to make a primary key in java class, so that while creating table by ORM,this field behaves as primary key.
+17. @Column:- It is used to define column related properties like name,unique,nullable,length,etc.
+18. @GeneratedValue:- It is used to define primary key generation strategy. (auto,identity,uuid)
+19. We need a class where we can perform CRUD related operations.(i.e repositories)
+20. Creating your repository as an interface and extending it from JpaRepository (or CrudRepository) in Spring Data JPA offers several advantages:
+    -  Simplified Data Access Layer:
+           Convenience Methods: JpaRepository comes with a set of built-in methods for common CRUD operations (e.g., save, findById, delete, etc.), so you don’t have to write boilerplate code for these operations.
+           Less Code: By extending JpaRepository, you reduce the amount of code you need to write and maintain.
+    - Automatic Implementation:
+           Proxy Generation: Spring Data JPA automatically generates the implementation of the repository interface at runtime, allowing you to focus on defining query methods without worrying about the underlying implementation.
+           Dynamic Query Methods: You can define methods in your repository interface with specific naming conventions (e.g., findByLastName) that Spring Data JPA will automatically implement for you.
+    -  Custom Query Methods:
+           You can easily define custom query methods using derived queries or by annotating methods with @Query for more complex queries, all while benefiting from the existing methods provided by JpaRepository.
+    - Transactional Support:
+           Spring Data JPA automatically applies transactional behavior to repository methods, making it easier to manage transactions without additional configuration.
+    -  Support for Pagination and Sorting:
+           JpaRepository provides built-in methods for pagination and sorting, simplifying these tasks when querying your database.
+
+21. Jpa provides interfaces whose implementations are provided by hibernate (even for repository interfaces). Since our custom repository (Product) extending JpaRepository ,so Jpa will create a (Product) repository class where it will implement all its methods (including itself + parent).
+    Jpa will annotate this repository class with @Component, so that spring boot would able to generate its bean (object) of this class and we can inject it.
+
+22. The Optional class in Java is a container object that may or may not hold a non-null value. Introduced in Java 8, it helps to handle the presence or absence of a value more gracefully, reducing the risk of NullPointerExceptions and making your code more expressive and easier to read.
+    -  Avoid Null Checks: Instead of returning null to indicate a missing value, methods can return an Optional, prompting the caller to handle the absence of a value explicitly.
+    -  Expressive API: The Optional class provides various methods for interacting with the contained value, such as isPresent(), ifPresent(), orElse(), orElseGet(), and map().
+    -  Fluent Style: The methods of Optional allow for a more functional programming style, making it easier to chain operations without explicit null checks.
+
+23. Service classes (@Service) are responsible for writing business related logics and wherever it needs to retrive / update data from db , it generally used repository class . (seperation of layers.)
+24. In a Spring Boot application, CommandLineRunner is a functional interface that can be used to execute specific pieces of code once the Spring application context has been fully loaded. It's particularly useful for running initialization tasks or performing actions right after the application starts.
+25. External libraries includes files/ jars related to dependencies added in pom.xml. (similar like package.json and node_modules folder).
+
+
+=====================================================================================================================================
+Advance JPA Part:-
+
+1. In order to make our entities, components being scanned outside current package, we need to specify which basepackages spring boot will scan in order to make avalibale respective beans / objects.
+2. Either we can define it our any component class or main class (spring boot application) or we can create our own configuration class (@Configuration annotation) and specify base packages. (If base packages are scanned then its sub packages will also be scanned).
+   @ComponentScan(basePackages = {"com.example.spring_jpa_ecom","in.repositories"})
+3. But to scan repositories outside current packages use @EnableJpaRepositories(basePackages = {"com.example.spring_jpa_ecom","in.repositories"})
+4. By default our application class package will be scanned for components, repositories and services.
+5. Each entity will repesent seperate table in database.
+6. To make relationships / mappings between entities in java, JPA will read the meta data about these mappings and since we are using this property (ddl-auto=update), then automatically this will reflect in actual db schema tables.
+7. Generally it is not possible to store all different entites data in single table,as each entity have many attributes. So we do relationship / mappings between them to fetch related data between them easily.
+8. Mappings:-
+    a) One to One :- A One-to-One mapping represents a relationship where each entity in the pair is associated with one and only one instance of the other entity. In Java, using JPA or Hibernate, this can be easily implemented using the @OneToOne and @JoinColumn annotations. It's useful in situations where entities are closely related, and each record in one table corresponds to exactly one record in the other table.(bidirectional mapping)
+    b) One to Many :- A One-to-Many (1:N) relationship is used to model scenarios where a single entity is associated with multiple instances of another entity. In Java, using JPA or Hibernate, this relationship is modeled using the @OneToMany annotation on the "one" side (e.g., Department) and the @ManyToOne annotation on the "many" side (e.g., Employee). The foreign key is typically placed in the "many" side of the relationship (e.g., Employee table referencing Department).
+    c) Many to One :- A Many-to-One (N:1) relationship is the reverse of the One-to-Many relationship. It models scenarios where many instances of one entity are associated with a single instance of another entity. In Java, using JPA or Hibernate, you can model this relationship with the @ManyToOne annotation on the "many" side (e.g., Employee), and the foreign key is stored in the "many" side entity (e.g., Employee table).
+    d) Many to Many :- A Many-to-Many (N:M) relationship is used to model scenarios where multiple instances of one entity are associated with multiple instances of another entity. In Java, using JPA or Hibernate, this relationship is represented using the @ManyToMany annotation on both entities, and a join table is created to store the relationships. This join table holds foreign keys referencing the primary keys of the two entities involved. The relationship can be lazy or eagerly fetched depending on the specific needs of the application.
+
+9. Ex:- One-to-One =>	Book and BookCover	=> One book has one cover, and one cover is linked to one book.
+        One-to-Many =>	Department and Employee =>	One department can have many employees, but each employee belongs to only one department.
+        Many-to-One	=>  Employee and Department	=> Many employees belong to one department. This is the inverse of One-to-Many.
+        Many-to-Many => Student and Course	=> Many students can enroll in many courses, and each course can have many students.
+
+10. In a unidirectional relationship, only one entity "knows" about the other. That is, one entity has a reference to the other, but the other entity does not have a reference back. Essentially, it means that the relationship is one-way.
+    Example: One-to-Many (Unidirectional)
+             For instance, in a One-to-Many relationship, the "one" side knows about the "many" side, but the "many" side does not know about the "one" side.
+    Code :- @Entity
+            public class Department {
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @OneToMany
+                @JoinColumn(name = "department_id")  // Foreign key in the Employee table
+                private List<Employee> employees;
+
+                // Getters and setters
+            }
+
+            @Entity
+            public class Employee {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                // No reference to Department here, only know the Department via the foreign key in the Employee table.
+
+                // Getters and setters
+            }
+    Explanation:
+    In this case, the Department entity knows about the Employee entity (through the employees list).
+    However, the Employee entity does not know about the Department entity (there is no department field in the Employee class). The Employee only has a foreign key to Department in the database, but does not have a reference to the Department entity in memory.
+
+11. In a bidirectional relationship, both entities know about each other. That is, each side of the relationship has a reference to the other. In other words, the relationship is two-way, meaning each entity can access the other.
+    Example: One-to-Many (Bidirectional)
+             In a One-to-Many relationship, if both the Department and Employee entities know about each other, it is a bidirectional relationship. In this case, the Department knows about its employees, and the Employee knows which Department it belongs to.
+
+    Code :- @Entity
+            public class Department {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @OneToMany(mappedBy = "department")  // "department" is the field in Employee
+                private List<Employee> employees;
+
+                // Getters and setters
+            }
+
+            @Entity
+            public class Employee {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @ManyToOne
+                @JoinColumn(name = "department_id")  // Foreign key in the Employee table
+                private Department department;  // Employee knows its department
+
+                // Getters and setters
+            }
+    Explanation:
+    In this case, the Department entity knows about the Employee entities via the employees list, and the Employee entity knows about the Department entity via the department field.
+    The mappedBy attribute in Department defines the inverse side of the relationship, which refers to the department field in Employee.
+    Both entities are linked, meaning both can navigate the relationship (from Department to Employee, and from Employee to Department).
+
+12. The choice between unidirectional and bidirectional depends on the specific needs of your application. If you don't need navigation in both directions, unidirectional is simpler. If you need both sides to be aware of each other for data access or logic, bidirectional is a better choice.
+13. The "mappedBy" attribute in JPA (Java Persistence API) is used in bidirectional relationships to specify the inverse side of the relationship. It tells JPA/Hibernate which entity's field (or property) is the owner of the relationship, i.e., where the foreign key will be stored. It helps avoid the creation of an additional foreign key and ensures that only one side of the relationship manages the persistence operations.
+    Key Points about the mappedBy Attribute:
+        a. Inverse Side: The mappedBy attribute is used on the non-owning (inverse) side of a bidirectional relationship. It tells JPA/Hibernate where the foreign key is located, essentially marking the other side as the owning side.
+        b. Avoiding Redundant Foreign Keys: By using mappedBy, you avoid creating two foreign keys in the database for a bidirectional relationship. Only the owning side will contain the foreign key, and the other side will simply reference it.
+        c. Consistency in Bi-directionality: When both entities in a bidirectional relationship reference each other, mappedBy ensures the relationship is properly synchronized. Without mappedBy, each side could try to manage the relationship, leading to possible inconsistencies or redundant database columns.
+    Example Scenario:
+    Let's consider a One-to-Many relationship between Department and Employee.
+
+    Bidirectional One-to-Many Relationship
+    Owning side: The Employee entity is considered the "owning" side because it contains the foreign key (department_id).
+    Inverse side: The Department entity refers to the employees collection but doesn't own the foreign key. The mappedBy attribute tells JPA/Hibernate that the foreign key is in the Employee entity.
+
+    Code :- @Entity
+            public class Department {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @OneToMany(mappedBy = "department")  // 'department' refers to the field in Employee entity
+                private List<Employee> employees;
+
+                // Getters and setters
+            }
+
+            @Entity
+            public class Employee {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @ManyToOne
+                @JoinColumn(name = "department_id")  // Foreign key in Employee table
+                private Department department;
+
+                // Getters and setters
+            }
+
+    Explanation of mappedBy in the Code:
+    - In the Department entity: The mappedBy = "department" annotation on the @OneToMany association tells JPA that the relationship is mapped by the department field in the Employee entity.
+    - In the Employee entity: The @ManyToOne annotation defines that many Employee instances can belong to one Department. The foreign key for this relationship is stored in the Employee entity in the column department_id.
+    Thus, in this case:=
+    - The Department class is the inverse side (doesn't manage the foreign key), while the Employee class is the owning side (manages the foreign key).
+
+    Benefits of Using mappedBy:
+    - Single Foreign Key: The foreign key is only present on the owning side (Employee in this case), preventing unnecessary foreign key columns in the database.
+    - Clear Ownership: It explicitly defines which side is the owner of the relationship. This helps avoid confusion, especially in complex relationships with multiple entities.
+    - Improved Data Integrity: By using mappedBy, you ensure that the relationships are synchronized and managed correctly. The owning side will be responsible for maintaining the relationship, and the inverse side will just reflect the changes.
+    - Cascading Operations: You can use cascade annotations on the owning side to propagate persistence operations (like save, delete, etc.) to related entities. This ensures that operations are applied consistently across both sides of the relationship.
+
+14. Without mappedBy, JPA assumes that both sides of a bidirectional relationship are the owners, leading to the creation of redundant foreign key columns or potentially extra join tables. The mappedBy attribute clarifies that the relationship is managed by only one side (the owning side), and it prevents the creation of unnecessary foreign keys or extra tables, ensuring a more efficient and consistent schema.
+    By specifying mappedBy, we define which side is the owning side and which is the inverse side, preventing redundant database columns and ensuring proper database structure.
+
+15. mappedby="object of entity of same class created in another class”
+   Note:-Mapped by can be used only in one class because one table must contain foreign key constraint. if mapped by can be applied on both side then it remove foreign key from both table and without foreign key there is no relation b/w two tables.
+   Note:- it can be use for following annotations:- 1.@OneTone 2.@OneToMany 3.@ManyToMany
+   Note---It cannot be use for following annotation :- 1.@ManyToOne
+   In one to one :- Perform at any side of mapping but perform at only one side . It will remove the extra column of foreign key constraint on the table on which class it is applied.
+   For eg . If we apply mapped by in Employee class on employee object then foreign key from Employee table will be removed.
+
+
+16. Since Product class has foreign key of category entity (it means product can identify category uniquely by its foreign key which is acting as primary key of category table).
+    And Category is not holding any reference / foreign key of Product entity but then how it will uniquely identify each product.
+    Since we have category primary key stored in product table , so i can easily reference that to get product row / product id information easily without the need of storing extra column for product in category entity.
+    (That's where mappedBy comes into play as it is using category primary to go to product table to find product as this is acting as foreign key over there.)
+
+17. In JPA (Java Persistence API), cascade operations are used to propagate certain operations (like persist, merge, remove, etc.) from one entity to another in a relationship. Cascade types help ensure that operations applied to the parent entity are automatically propagated to its related child entities.
+    Cascade Type  => 	Description	=> Common Use Case
+    a. PERSIST	  => Propagates persist() (save) from parent to child  =>  When saving a parent and all related entities should be saved too.
+    b. MERGE  =>  Propagates merge() (update) from parent to child => When updating a parent and all related entities should be updated.
+    c. REMOVE => 	Propagates remove() (delete) from parent to child	=> When deleting a parent and all related entities should be deleted.
+    d. REFRESH =>	Propagates refresh() (reload) from parent to child  =>	When refreshing a parent and all related entities should be refreshed.
+    e. DETACH	=> Propagates detach() (detach from persistence context) from parent to child	=> When detaching a parent and all related entities should also be detached.
+    f. ALL	=> Propagates all operations (PERSIST, MERGE, REMOVE, REFRESH, DETACH)	=> When all operations should be applied to the parent and all related entities.
+
+    Code :- @Entity
+            public class Department {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @OneToMany(cascade = CascadeType.ALL)  // All operations will be cascaded to Employee entities
+                private List<Employee> employees;
+
+                // Getters and setters
+            }
+
+            @Entity
+            public class Employee {
+
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                private Long id;
+                private String name;
+
+                @ManyToOne
+                @JoinColumn(name = "department_id")
+                private Department department;
+
+                // Getters and setters
+            }
+    In this case, operations like persist(), merge(), remove(), refresh(), and detach() on a Department will automatically propagate to the associated Employee entities.
+
+18. In Java Persistence API (JPA), the fetch type defines how related entities are fetched from the database when performing a query. It is primarily used to control the behavior of lazy loading and eager loading in relationships between entities
+    Fetch Type => 	Description => 	When to Use
+    LAZY  => Related entities are loaded only when accessed.  => 	When you want to optimize performance by avoiding unnecessary data fetching.
+    EAGER  => 	Related entities are loaded immediately when the parent is loaded. => 	When you always need the related entities, and performance is not a concern.
+
+19. Basic Crud operations will be provide by JPA in our repositories but for advance stuff like joins,conditions,queries. How should we implement that:-
+    - Custom finder methods :- We can define custom methods in repositories with proper protocol / rules and JPA will automatically provides implementation of that method.
+           Ex:- findByPrice(double price)
+    - JPQL / Native (Query methods) :- Here you can define custom method without any naming convention issue (protocol) but you need to use @Query("JPQL / Native") annotation where you need to write queries.
+                JPQL  vs   Native
+             1. JPQL Applies to entities(java) but Native applies to DB tables.
+             2. JPQL not specific to DB but native queries are specific to db.
+             3. JPQL has less power than Native ones.
+
+        Ex:- JPQL -> @Query("select p from Product p")      // entity class name here
+                 List<Product> getMyCustomQueryProducts();
+             Native -> @Query(nativeQuery = true,value = "select * from jpa_products")  // db table name here not entity name
+                 List<Product> getMyCustomNativeQueryProducts();
+
+20.

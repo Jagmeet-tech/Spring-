@@ -1,0 +1,76 @@
+1. In java, we generally stores the data in objects and these are created in heap which are not persistant.
+2. We can store the data in files as well, but it is not structured and organized for fetching.
+3. We need java to process the data and store them in databases.
+4. We need to seperate the logic by creating the DAO (Data Access Layer) which generally provides methods for interaction with databases and service layer for writing only business logic.
+5. JDBC:- (Java / Jakarta Database connectivity)
+    - It is a core api provided by java for interaction with different databases and perform CRUD operations.
+    - It requires basic boiler plate code everytime whenever we need to interact with db in code. (ex: loading the specific db driver -> making the connection -> preparing statements -> executing the sql -> iterating the resultset -> closing the connection.)
+    - It generally throws checked exceptions which needs to be handled at compile time only by the developers.
+    - Sql injection issues may happen due to prepared statements.
+
+
+6. Spring JDBC :-
+    - It a module provided by spring which solves above issues like code repeating, converts checked exceptions -> unchecked , prevents sql injection  and provides easier coder than normal JDBC.
+    - It needs Datasource , jdbcTemplate related objects. (by creating it's bean , so that we can inject it in anywhere.)
+    - Datasource :- It is an interface and part of the javax.sql package and provides methods for getting database connections. (DB details mentioned in this). You can configure a DataSource in your Spring application context (XML or Java configuration).
+    - jdbcTemplate:- JdbcTemplate is a core class in the Spring Framework that simplifies the use of JDBC (Java Database Connectivity) for database operations. It provides a high-level abstraction over JDBC, allowing developers to execute SQL queries and updates with less boilerplate code.
+                    Features: a) Simplified Database Operations:- JdbcTemplate reduces the amount of code you need to write for common database tasks, such as opening connections, handling exceptions, and closing resources.
+                              b) Parameterized Queries: It supports the use of parameterized queries, which helps prevent SQL injection attacks.
+                              c) Mapping Results: JdbcTemplate provides several methods for mapping query results to Java objects, using row mappers or directly into lists or maps.
+                              d) Transaction Management: It integrates well with Spring's transaction management features, allowing you to manage transactions declaratively.
+                              e) Exception Handling: It translates JDBC exceptions into Spring's DataAccessException hierarchy, making it easier to handle errors.
+                              f) It allows you to focus more on the business logic rather than the boilerplate code, thus improving productivity and maintainability.
+
+    - We need to pass datasource in jdbcTemplate object as argument, so that jdbcTemplate object would know db details and performs operations respectively.
+    - In Spring , we need to manually create these things , but in spring boot as we know (it creates automatic configurations and beans) so datasource and jdbctemplate objects were accessible easily in that.
+    - Model is a class which represents an entity. (User, Product) but it doesn't directly interacts with db it's related Dao class will.
+
+7. Dao classes are annotated with @Repository annotation (layer specific) or with @Component (general) . Both will be able to help in injection.
+8. Genrally Creating interfaces for DAO classes is necessary for several reasons, and failing to do so can lead to specific problems in your application
+        - Abstraction:
+          Reason: Interfaces define a contract without dictating how methods are implemented.
+          Problem Without It: Directly using concrete classes can lead to tightly coupled code, making it difficult to change implementations without affecting the rest of the application.
+
+        - Decoupling:-
+          Reason: Interfaces allow different parts of the application (like service layers) to depend on abstractions rather than specific implementations.
+          Problem Without It: If you use concrete classes, changes in the DAO implementation require changes in all dependent classes, increasing the risk of bugs and maintenance overhead.
+
+        - Easier Testing:
+        Reason: Mocking interfaces is straightforward in unit tests, enabling you to isolate components.
+        Problem Without It: If your service layer directly depends on a concrete DAO, testing becomes challenging since you would need a real database connection, complicating the test setup.
+
+        - Flexibility in Implementation:
+        Reason: Different implementations can be created for different scenarios (e.g., production vs. testing).
+        Problem Without It: You might be forced to modify the existing codebase to accommodate different data sources or strategies, leading to duplicated code or increased complexity.
+
+        - Improved Maintainability
+        -Support for Multiple Implementations:
+        Reason: Interfaces allow you to switch between different implementations easily.
+        Problem Without It: You might end up with a monolithic DAO class that becomes difficult to modify or extend, as any change impacts all parts of the application relying on it.
+
+9. If in spring/ spring boot , you are getting bean of an interface , then automatically IOC container will provide object of its implementation class.
+10. RowMapper :- It is an interface that helps map rows of a ResultSet to Java objects. It is commonly used in frameworks like Spring JDBC to simplify the process of converting the results of a SQL query into a more usable form, such as Java beans or custom objects.
+               (Uses):- a) Object Mapping: It allows you to define how each row in the ResultSet should be transformed into a Java object. This is especially useful for mapping columns to fields in a custom class.
+                        b) Separation of Concerns: By using a RowMapper, you keep your data access logic clean and focused on mapping, rather than mixing it with your business logic.
+                        c) Reusable Mappers: You can create reusable RowMapper implementations that can be used across different queries, making your code more modular and maintainable.
+                        d) Error Handling: Implementing your own RowMapper gives you control over how to handle potential errors during the mapping process, such as null values or type mismatches.
+    Note:- If we have different names in java model class fields and its respective table column or if we are joining multiple tables , then we need to create custom logic of RowMapper and passed it as argument wherever needed.
+
+11. A functional interface in Java is an interface that contains exactly one abstract method. This concept is essential for enabling the use of lambda expressions and method references, which provide a more concise and readable way to implement single-method interfaces.
+12. Common Functional Interfaces in Java: Java provides several built-in functional interfaces in the java.util.function package, such as:
+    Predicate<T>: Represents a boolean-valued function of one argument.
+    Function<T, R>: Represents a function that takes one argument and produces a result.
+    Consumer<T>: Represents an operation that accepts a single input argument and returns no result.
+    Supplier<T>: Represents a supplier of results.
+    Functional interfaces and lambda expressions make it easier to work with functional programming concepts in Java, promoting cleaner and more modular code.
+
+13. We can provide implementations of functional interfaces either by:-
+        a) Creating its implementation class.
+        b) Providing implementation through anonymous class.
+        c) Through lambda expression.
+
+14. query() method of jdbc returns list whereas queryForObject returns single object.
+15. Joins:- These are used to combine multiple related tables through foreign keys. (It is a key which is acting as primary key in another table.)
+        (Generally inner joins are used to show real relation without any duplicate records , but just intersection.)
+        Issue:- Since we are joining two tables, so the columns of both table would combine. Then the ResultSet which the sql would return needs to map manually with Java object. (Which java object would store both product and catgeory info.)
+                So, we need to create new model class which has data members / fields of both product and category which resultset is returning . We can either map it through custom RowMapper if field names are different.
