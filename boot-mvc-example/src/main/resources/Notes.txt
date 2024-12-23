@@ -1,0 +1,54 @@
+Notes :-
+1. Website is something which server returns to client which includes complete source code of a page. (frontend (template engine like thymeleaf) + backend rendered on same server and by spring boot.)
+2. Web services means like rest api's, Soap api's, return to client as response.
+3. Client makes request to server using IP address (mapped with domain name in DNS) of that server through internet. Inside server , servlets accept the incoming request process it and returns suitable response back to client.
+4. Servlets is the base technology for backend server application of Java.
+5. Spring MVC is framework which makes our life easier to write code in easy manner without much repetition and includes much more features.
+6. Spring MVC focus on three parts:- (separation of concerns)
+    -  Controllers  (Accepts client request)
+    -  Views  (frontend / user interface)
+    -  Models (Data + business logic)
+7. Flow of Control in Spring MVC:
+   - The client (browser) sends an HTTP request to the server.
+   - The DispatcherServlet intercepts the request and consults the HandlerMapping to find the appropriate controller method.
+   - The controller processes the request, interacts with the model (business logic/data), and returns a view name.
+   - The ViewResolver maps the view name to an actual view (e.g., JSP, Thymeleaf).
+   - The view is rendered with the data from the model, and the response is sent back to the client.
+
+Client (Browser) → DispatcherServlet → HandlerMapping → Controller → Model (Data)
+     ↓                                                                 ↓
+   ViewResolver ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← View (JSP/HTML)
+
+8. To use Spring MVC in a traditional spring project (not spring boot), you'll need to follow a series of steps to set up the necessary components and configure the project correctly.
+     - Add spring-webmvc dependency in pom.xml
+     - dispatcher servlet (front controller) configure
+     - Now need to configure these three things in (dispatcher-servlet.xml) :- annotation drive , component scan for spring related packages,view resolver configure
+     ( <mvc:annotation-driven /> enables annotation-based Spring MVC features like @Controller, @RequestMapping, etc.
+      <context:component-scan /> allows Spring to automatically detect and register beans from your specified base package (e.g., com.example).
+      InternalResourceViewResolver is used to map view names (e.g., returned from controllers) to JSP pages.)
+     - Create controller and jsp file to test.
+
+9. In spring boot, as it is known for its auto configuration feature. So automatically it will configure all above things.
+10. By default spring boot mvc comes with support of thymleaf not the jsp template engine.
+11. @Controller is used to define a controller class in Spring MVC.
+12. @RequestMapping is used to map HTTP requests to handler methods within a controller, and it can be customized with different parameters to specify the request type (URL, HTTP method, headers, etc.).
+13. "Model" in Spring MVC holds data that is passed from the controller to the view.
+    - In the controller, you can add data to the model using the Model interface or the ModelAndView class.
+    - The model data is used by the view to render dynamic content, like displaying user-specific information, messages, etc.
+    - The Model plays a key role in the separation of concerns between the business logic (controller) and presentation (view) in Spring MVC.
+    Ex:- model.addAttribute("name","Spring MVC learning");
+
+14. In thymleaf , you can display model text like this :- <h3 th:text="${name}"></h3>
+15. By default controllers return the name of pages which is typically known as views which viewresolver scannes in order to find template file.
+16. But since we need only data not the views from backend, we will use @ResponseBody annotation to methods so that it returns response as it is to browser not the views.
+17. The @ResponseBody annotation in Spring is used to indicate that the return value of a method should be directly written to the HTTP response body, rather than being interpreted as a view name. In other words, it tells Spring to skip view resolution and directly serialize the returned object into the response, typically in formats like JSON or XML.
+18. The @RestController annotation in Spring is a specialized version of the @Controller annotation. It is used in Spring MVC to create RESTful web services where the response body of the methods is automatically serialized (typically to JSON or XML) and sent directly to the client, without the need to resolve a view (like JSP or HTML). (@RestController = @Controller + @ResponseBody)
+19. Since browser is used to see HTML content responses not the JSON , so use postman software to see JSON responses.
+20. @RequestMapping is a general-purpose annotation for mapping HTTP requests, while @GetMapping is a specialized shortcut for handling GET requests.
+    @GetMapping makes your code more readable and concise when dealing with GET requests, whereas @RequestMapping provides more flexibility for handling multiple HTTP methods in one annotation.
+21. @JsonIgnore is an annotation provided by the Jackson library (which is commonly used in Spring for JSON processing) to mark a field, method, or property to be ignored during the serialization and deserialization process.
+    It is useful for hiding sensitive data, internal fields, or avoiding circular references in JSON serialization.
+
+22.
+
+
