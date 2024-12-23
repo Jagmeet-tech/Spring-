@@ -75,6 +75,14 @@ public class Product {
     @ManyToOne
     private Category category;  // owning side for managing relationships (store foreign key)   // child entity
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -83,6 +91,7 @@ public class Product {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", isLive=" + isLive +
+                ", category=" + category +
                 '}';
     }
 }

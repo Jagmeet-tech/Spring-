@@ -82,7 +82,7 @@ Notes:-  JPA (Java Persistence API)
 
 
 =====================================================================================================================================
-Advance JPA Part:-
+Advance JPA Part:- 1
 
 1. In order to make our entities, components being scanned outside current package, we need to specify which basepackages spring boot will scan in order to make avalibale respective beans / objects.
 2. Either we can define it our any component class or main class (spring boot application) or we can create our own configuration class (@Configuration annotation) and specify base packages. (If base packages are scanned then its sub packages will also be scanned).
@@ -301,4 +301,160 @@ Advance JPA Part:-
              Native -> @Query(nativeQuery = true,value = "select * from jpa_products")  // db table name here not entity name
                  List<Product> getMyCustomNativeQueryProducts();
 
-20.
+=======================================================================================================================
+Advance JPA Part:- 2
+
+1. How to search a data using like query using above methods.
+2. In order to test particular functions , you can write custom functions and call them there in test folder and use annotation @Test so that unit testing for that function could take place.
+3. @Param annotation is used to pass function arguments in queries and ":variable_name" is used receive function arguments into.
+4. In JPQL , we dont use * to repesent row, we use object to represent / select that.
+5. In JPQL , join query behaves different than native one. We don't pass two tables instead take reference of second table from current entity as it stores second entity reference within itself.
+6. Also within JPQL queries you can use "fetch" keyword to load different entity data on single query to in different query based on demand.
+7. "fetch" tells JPA to use eager fetching for the category relationship. This means that it will retrieve the Product along with its associated Category in one query (avoiding lazy loading later).
+8. You can create your custom rowmapper class to hold the data from resultset into your java object so that it could store multiple entities information / attributes as well. Ex :- in case of joins.
+
+=======================================================================================================================
+Advance JPA Part:- 3
+
+1. The Criteria API is a programmatic way to fetch the data from database thorugh java code / methods without need of knowing JPQL / Native SQL queries.
+2. The Criteria API in JPA (Java Persistence API) is a powerful, type-safe way to construct queries dynamically in Java. It allows developers to build SQL-like queries using Java objects and methods, rather than writing raw SQL or JPQL (Java Persistence Query Language). The Criteria API is part of JPA and is defined in the javax.persistence.criteria package.
+   Benefits :-
+        a. Type-Safety :- Unlike JPQL or native SQL, which are string-based and prone to errors during runtime, the Criteria API provides type-safe queries. This means that the queries are checked during compile time, reducing runtime errors.
+        b. Dynamic Query Construction :- You can build queries dynamically by adding conditions, joins, and projections based on your application logic. This is helpful when the query structure is not fixed or depends on user input or other conditions at runtime.
+3. Components of the Criteria API :-
+   a. CriteriaBuilder: The main factory for creating the various elements used in the Criteria API. It allows you to create query objects, predicates, selections, and more.
+   b. CriteriaQuery: Represents a query that is to be executed. This is where you define the query structure (e.g., which entities to query, what fields to select, etc.).
+   c. Root: Represents the main entity (or table) in the query. You use it to specify which entity you are querying.
+   d. Predicate: Represents a condition that can be used to filter results (e.g., equal, greaterThan, like).
+   e. Selection: Used to define what parts of the entity should be included in the query result (e.g., specific columns or projections).
+
+   Ex :- // 1. Get the CriteriaBuilder
+         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+         // 2. Create a CriteriaQuery
+         CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
+
+         // 3. Define the Root (representing the entity/table)
+         Root<Employee> root = criteriaQuery.from(Employee.class);
+
+         // 4. Create a Predicate (for filtering)
+         Predicate predicate = criteriaBuilder.equal(root.get("department"), "HR");
+
+         // 5. Apply the Predicate to the CriteriaQuery
+         criteriaQuery.select(root).where(predicate);
+
+         // 6. Execute the query
+         TypedQuery<Employee> query = entityManager.createQuery(criteriaQuery);
+         List<Employee> employees = query.getResultList();
+
+4. You can define multiple predicates and pass in where() function .
+5. How does it work in case of joins:-
+   a. Creating Joins: You can join related entities using the Root object (representing the main entity) and the Join interface.
+   b. Types of Joins: You can create different types of joins, such as:
+      Inner Join: By default, the join method creates an inner join.
+      Left Join: Using the leftJoin method creates a left outer join.
+   c. Join Conditions: After creating the join, you can apply conditions (Predicate) to filter the joined data.
+   d. Fetching Data: You can use joins to fetch attributes of related entities.
+
+   Ex:- Simple Inner Join :- In the following example, we are joining two entities: Employee and Department. The Employee entity has a ManyToOne relationship to the Department entity.
+        // 1. Get CriteriaBuilder
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        // 2. Create CriteriaQuery
+        CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
+
+        // 3. Define the Root (representing the main entity)
+        Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
+
+        // 4. Create the Join (representing the relationship with Department)
+        Join<Employee, Department> departmentJoin = employeeRoot.join("department");
+
+        // 5. Add filtering condition (e.g., filter by department name)
+        Predicate predicate = criteriaBuilder.equal(departmentJoin.get("name"), "HR");
+
+        // 6. Apply the predicate to the CriteriaQuery
+        criteriaQuery.select(employeeRoot).where(predicate);
+
+        // 7. Execute the query
+        TypedQuery<Employee> query = entityManager.createQuery(criteriaQuery);
+        List<Employee> employees = query.getResultList();
+
+
+    - employeeRoot.join("department"): This creates an inner join between Employee and Department, where "department" is the name of the field in the Employee entity that maps to the Department entity.
+    - departmentJoin.get("name"): We can access fields of the Department entity through the join and apply conditions (e.g., filtering by department name).
+
+6. Summary of Key Functions for CriteriaBuilder:
+   Predicate Creation: equal, notEqual, greaterThan, like, in, etc.
+   Expression Functions: sum, avg, count, min, max, etc.
+   Query Components: createQuery, createCriteriaQuery, literal, select, etc.
+
+7. Summary of Key Functions for CriteriaQuery:
+   Query Setup: select, from, where, groupBy, orderBy, etc.
+   Pagination and Hints: setMaxResults, setFirstResult, setHint.
+   Grouping and Sorting: groupBy, having, orderBy.
+
+8. Transaction Management :-
+    - A transaction is a unit of work that ensures data consistency in your database.
+    - All database operations within a transaction are treated as a whole.
+    - If any operation fails, the entire transaction is rolled back, reverting all changes.
+    - If you want to do manually (JDBC) , then you have to start the transaction and after it completes you have to commit it . In between if any error happens , you have to rollback changes. Also you need to make autoCommit(false) in this case. we can get object of transaction through entityManager.
+    - In JPA , @Transactional annotation is applied at the method or class level in your service or repository classes. It tells spring to manage the transaction automatically. (framework handling transaction automatically)
+
+
+9. Entity Events :-
+    - Entity events in JPA refer to lifecycle events that are triggered during various stages of an entity's lifecycle, such as when an entity is persisted, updated, removed, or queried. These events allow developers to define specific actions or behaviors that should occur at certain points in the entity’s lifecycle, such as performing validation, logging, or business logic before or after a particular operation.
+    - JPA provides callback methods and listener events to handle these entity events. These can be used to intercept and react to entity state changes.
+    - Entity events in JPA provide a way to hook into the lifecycle of an entity, allowing developers to define custom behavior at specific stages (persist, update, remove, and load). These lifecycle callback methods (@PrePersist, @PostPersist, @PreUpdate, @PostUpdate, @PreRemove, @PostRemove, @PostLoad) can be applied directly to entities or through external entity listeners to centralize the event handling logic. This helps ensure consistent behavior across your application and enhances modularity and maintainability.
+    - Pre-Persist / Post-Persist: For setting default values, logging, or any initialization needed before or after saving the entity.
+      Pre-Update / Post-Update: For updating related entities, validation, or logging whenever an entity is updated.
+      Pre-Remove / Post-Remove: For cleaning up resources, auditing, or notifying other components when an entity is deleted.
+      Post-Load: For initializing transient fields or performing actions after loading an entity.
+
+    - Ex :- @Entity
+            public class Employee {
+
+                @Id
+                private Long id;
+
+                private String name;
+
+                @PreUpdate
+                public void preUpdate() {
+                    // Code to run before the entity is updated (e.g., validation)
+                    if (name == null || name.trim().isEmpty()) {
+                        throw new IllegalArgumentException("Name cannot be empty");
+                    }
+                }
+            }
+
+
+    - Entity Listeners :- In addition to using annotations directly on entity classes, JPA also allows you to use entity listeners to centralize lifecycle event handling. Entity listeners are separate classes that can handle lifecycle events for one or more entities.
+      Ex:- @Entity
+           @EntityListeners(EmployeeListener.class)
+           public class Employee {
+
+               @Id
+               private Long id;
+
+               private String name;
+
+               // Other fields and methods
+           }
+
+           public class EmployeeListener {
+
+               @PrePersist
+               public void prePersist(Employee employee) {
+                   // Code to run before the entity is persisted
+                   System.out.println("About to persist Employee " + employee.getName());
+               }
+
+               @PostPersist
+               public void postPersist(Employee employee) {
+                   // Code to run after the entity is persisted
+                   System.out.println("Employee " + employee.getName() + " has been persisted.");
+               }
+
+               // Other lifecycle event methods
+           }
+      In this example, the EmployeeListener class handles the @PrePersist and @PostPersist events for the Employee entity.
