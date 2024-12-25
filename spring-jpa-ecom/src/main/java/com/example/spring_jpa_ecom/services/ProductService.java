@@ -2,6 +2,7 @@ package com.example.spring_jpa_ecom.services;
 
 import com.example.spring_jpa_ecom.entities.Category;
 import com.example.spring_jpa_ecom.entities.Product;
+import com.example.spring_jpa_ecom.exception.ResourceNotFoundException;
 import com.example.spring_jpa_ecom.repositories.ProductRepository;
 import in.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -32,7 +33,7 @@ public class ProductService {
 
     public Product byId(int pid){
 //        Product prod = productRepository.findById(pid).get();
-        Product prod = productRepository.findById(pid).orElseThrow(()-> new RuntimeException("Product not found with productID:-" + pid));
+        Product prod = productRepository.findById(pid).orElseThrow(()-> new ResourceNotFoundException("Product not found with productID:-" + pid));
         return prod;
     }
 

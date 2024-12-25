@@ -2,8 +2,11 @@ package com.example.spring_jpa_ecom.services;
 
 import com.example.spring_jpa_ecom.entities.Category;
 import com.example.spring_jpa_ecom.entities.Product;
+import com.example.spring_jpa_ecom.exception.ResourceNotFoundException;
+import in.repositories.CategoryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +15,21 @@ import java.util.List;
 public class CategoryService {
 
     private EntityManager entityManager;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    public List<Category> getAll(){
+        return categoryRepository.findAll();
+    }
+
+    public Category getById(int categoryId){
+        return categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category Not found"));
+    }
+
+    public Category create(Category category){
+        return categoryRepository.save(category);
+    }
 
     public CategoryService(EntityManager entityManager) {
         this.entityManager = entityManager;

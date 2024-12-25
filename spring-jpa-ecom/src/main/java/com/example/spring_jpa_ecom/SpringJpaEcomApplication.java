@@ -31,11 +31,11 @@ public class SpringJpaEcomApplication implements CommandLineRunner {
 //		System.out.println(updatedProduct);
 //		System.out.println("Product created successfully...");
 
-		System.out.println("Showing all products -------");
-		productService.allProducts().forEach(product -> System.out.println(product));
-
-		System.out.println("Single product ---------");
-		System.out.println(productService.byId(2));
+//		System.out.println("Showing all products -------");
+//		productService.allProducts().forEach(product -> System.out.println(product));
+//
+//		System.out.println("Single product ---------");
+//		System.out.println(productService.byId(2));
 
 //		System.out.println("Deleting product --------");
 //		productService.delete(3);

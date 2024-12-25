@@ -1,6 +1,7 @@
 package com.example.spring_jpa_ecom.entities;
 
 import com.example.spring_jpa_ecom.listeners.CategoryEventListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class Category {
 //    @OneToOne(mappedBy = "category")
 //    private Product product;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,fetch = FetchType.LAZY)  // parent entity
     private List<Product> productList;
 

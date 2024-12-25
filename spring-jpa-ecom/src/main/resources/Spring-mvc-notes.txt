@@ -1,0 +1,127 @@
+Notes 2 :- (Notes 1 of mvc covered in boot-spring-mvc project.)
+1. How client can ask specific data from server.
+    -  Using URL Path Variables / Parameter :- ( http://localhost:8080/pages/category/2345) :- In this case, category is part of the path and 2345 is an identifier for a specific category. This would be used to fetch details about category 2345 directly. (@PathVariable is used to retrieve client data in server)
+    - Using  URL Query Parameter :- ( http://localhost:8080/pages/products?category=2345) :- In this case, category=2345 is passed as a query parameter to the server. This is often used
+      to filter products or resources based on the category value. (@RequestParam is used to retrieve client data in server)
+   - Using post request / form in body.  (@RequestBody is used to retrieve client data in server)
+
+2. Summary of Data Transmission Methods:
+            Method       -> HTTP Method(s)	->  Use Case	-> Example
+           URL Parameters  -> 	GET	Search, filters, simple data	-> /search?query=books&category=fiction
+           Form Data (Body) ->	POST	-> Form submissions (e.g., login, registration)  ->	<form action="/submit" method="POST"><input name="username" value="user"></form>
+           AJAX/Fetch (JSON) ->	 POST, GET ->  Dynamic data update without page reload -> fetch('/api', { method: 'POST', body: JSON.stringify(data) })
+           Headers -> 	Any	Authentication, metadata ->	fetch('/api', { headers: { 'Authorization': 'Bearer token' } })
+           Cookies  ->	Any	Session management, persistent data ->  Cookies sent automatically by the browser in every request to the same domain
+           WebSockets	WebSocket ->  Real-time data exchange   -> socket.send(JSON.stringify({ message: 'Hello' }))
+          Multipart/Form-Data  ->	 POST  ->  File uploads   -> 	<form enctype="multipart/form-data" method="POST" action="/upload"><input type="file" name="file"></form>
+
+3. The @PathVariable annotation is used in Spring MVC (a framework in Java) to extract values from the URI path of an HTTP request. It binds a method parameter to a variable in the
+    URL path, allowing dynamic data from the URL to be passed into a controller method.
+    ex:- @RequestMapping("/product/{categoryId}/item/{itemId}")
+           public String getProduct(@PathVariable("categoryId") int categoryId,@PathVariable("itemId") int itemId) {
+                     return "Category ID: " + categoryId + ", Item ID: " + itemId;
+           }
+4. The @RequestParam annotation in Spring MVC (and Spring Web in general) is used to extract query parameters (or form parameters) from the URL or request and bind them to
+    method parameters in a controller. It allows you to retrieve values that are passed in the query string or form data of an HTTP request.
+    ex: - @RequestMapping("/search")
+             public String search(@RequestParam(value = "query", defaultValue = "default") String query, @RequestParam(value = "limit", defaultValue = "10") int limit) {
+                    return "Search query: " + query + ", Limit: " + limit;
+             }
+5. We need to define DTO  / Data holder class which will receive the incoming post data and all its members could be converted to DTO class object members .
+6. Never use entity classes for holding / storing incoming request body data because entities are made for storing / holder data related to database and it should not be interacted with
+    another layer for holding / storing purposes . Instead create another data holding classes for that.
+7.  While you can technically use an entity class to store incoming request data, it's not recommended because it:
+      -  Breaks the separation of concerns between your API layer and your database layer.
+      -  Makes validation, security, and transformations more difficult which database is using and your API doesn't require at that time.
+      -  Exposes sensitive fields to the client unnecessarily which are specific to db storages / entities like (createdAt,updatedAt).
+      -  Limits the flexibility in handling changes to your database or API request structures. (structure mismatches)
+    Instead, it's a better practice to use DTOs or Request Models for incoming request data, which you can then map to entities for database storage. This approach enhances
+    maintainability, security, and flexibility in your application architecture.
+8. For different HTTP methods , you can use different specific annotations without the need to write general annotation like @RequestMapping(method = "") and changing arguments .
+    ex:-  @PostMapping , @GetMapping,@PostMapping,@PutMapping,@DeleteMapping
+9. Summary Table of HTTP Methods
+            HTTP Method	-> Purpose    -> Idempotent	-> Safe Example
+                 GET	-> Retrieve data from the server	-> Yes -> 	Yes ->	/products/123
+                POST	-> Send data to the server (e.g., create a resource) ->	No ->	No ->	/products (create new)
+                 PUT	-> Replace an existing resource ->	Yes ->	No ->	/products/123 (replace)
+               PATCH	-> Partially update an existing resource ->	Yes -> 	No ->	/products/123 (update price)
+              DELETE	-> Delete a resource ->	Yes -> 	No ->	/products/123 (delete)
+               HEAD	-> Retrieve only the headers of a resource ->	Yes ->	Yes ->	/products/123 (headers only)
+             OPTIONS	-> Describe available methods for a resource -> 	Yes	-> Yes ->	/products (methods allowed)
+              TRACE	-> Echo the request for debugging	-> Yes  -> 	Yes -> 	/products/123
+            CONNECT	 -> Establish a network connection to the server ->	No ->	No	-> CONNECT www.example.com:443
+
+10. Idempotent operations can be repeated multiple times with the same outcome. HTTP methods like GET, PUT, and DELETE are idempotent because their result does not change with
+      repeated requests (except for DELETE, which has no effect after the resource is deleted). POST is not idempotent because each request can create a new resource, leading to
+      different outcomes each time.
+11. You can receive files / images in server handler through @RequestParam as it is not coming requestBody.
+12.  Reason :- You can receive files (including images) in a server handler through @RequestParam in Spring. The key difference between using @RequestParam and @RequestBody is
+      in how the data is sent and processed.
+
+      - Receiving Files via @RequestParam :- When files (such as images) are uploaded via a multipart form data request, you typically use @RequestParam to bind the file to a method
+        parameter in the controller. This is because file uploads are handled as form-data, and @RequestParam can handle form data, including files.
+         Ex:-     import org.springframework.web.bind.annotation.*;
+                    import org.springframework.web.multipart.MultipartFile;
+
+                   @RestController
+                  @RequestMapping("/upload")
+                   public class FileUploadController {
+
+                  @PostMapping("/image")
+                  public String uploadImage(@RequestParam("file") MultipartFile file) {
+                        try {
+                            // Process the file (e.g., save it to the server or database)
+                            String fileName = file.getOriginalFilename();
+                            // Code to save the file, e.g., file.transferTo(new File(path));
+                            return "File uploaded successfully: " + fileName;
+                           } catch (Exception e) {
+                              return "File upload failed: " + e.getMessage();
+                          }
+                     }
+               }
+           Request Type: The client should send a POST request with the Content-Type: multipart/form-data header.
+           Request Body: The body of the request contains the file and possibly additional data (e.g., metadata).
+
+  - Receiving Files via @RequestBody :- On the other hand, @RequestBody is generally used for receiving JSON or XML payloads, not files. While it is technically possible to receive a file
+     in the request body using @RequestBody, this is not how file uploads are typically handled in web applications, especially in Spring. File uploads are usually sent as multipart/form-
+     data, and @RequestBody cannot process that format by default.
+
+   However, if you absolutely need to send a file via @RequestBody, you would need to encode the file in base64 (for example) and then pass it as a string in the request body, which is
+   less efficient and not ideal for large files.
+
+ -  Why Use @RequestParam for File Uploads?
+    Multipart Form Data: File uploads in HTTP requests are typically sent as multipart/form-data, which allows for sending files along with other data in a single request. Spring’s
+                                     @RequestParam is designed to handle these requests efficiently.
+     File Handling: Using @RequestParam("file") MultipartFile makes it easier to access file metadata, like file name, content type, and size, while also providing methods to access the
+                            cactual content of the file.
+  (MutlipartFile is data holder class.)
+ (file comes through header with file key array.)
+
+13. Exceptions handling in spring MVC :-
+      -  Handling Exceptions within a Controller Using @ExceptionHandler
+      -  Global Exception Handling with @ControllerAdvice
+      -  Using @ResponseStatus to Automatically Return HTTP Status Codes
+      -  Customizing the Response with ResponseEntityExceptionHandler
+      - Handling Validation Errors (BindingResult)
+      -  Exception Handling Using Filters and Interceptors
+
+14. Important status codes :-
+      Code	Description	Category
+         200	OK	Success
+         201	Created	Success
+         204	No Content	Success
+         301	Moved Permanently	Redirection
+         302	Found (Temporary Redirect)	Redirection
+         304	Not Modified	Redirection
+         400	Bad Request	Client Error
+         401	Unauthorized	Client Error
+         403	Forbidden	Client Error
+         404	Not Found	Client Error
+         405	Method Not Allowed	Client Error
+         409	Conflict	Client Error
+         500	Internal Server Error	Server Error
+         502	Bad Gateway	Server Error
+         503	Service Unavailable	Server Error
+15. ResponseEntity is a powerful class in Spring that provides full control over the HTTP response, including the status code, headers, and body. It is typically used in RESTful web services (especially with @RestController), but it can be used in any Spring MVC controller where you need more flexibility in crafting the response.
+16. Always create your custom exception classes by extending with Runtime exception and use that.
+17. Thorugh custom exception always return a suitable custom response object(could be DTO / model class) not the string / ResponseEntity class because in that model you can set your custom data members.
