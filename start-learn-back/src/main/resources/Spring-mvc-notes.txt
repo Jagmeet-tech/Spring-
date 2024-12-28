@@ -1,0 +1,88 @@
+Notes -3 :- (Part 2 is covered in jpa project and Part 1 covered in mvc project )
+
+1. Use lambok to generate getter,setter, consturctor,toString with just annotation.
+2. When we do bidrectional maaping in entities, then it will create two extra columns for maintaining that relationship. So in order to avoid that, use mappedBy attribute so that primary which is acting as foreign key in another table would be taken as advantage.
+3. mappedBy is not used with @ManytoOne relationship.
+    Reason :- mappedBy is used on the inverse side of the relationship, and it indicates which field in the other entity owns the relationship.
+              Since @ManyToOne is the owning side and contains the foreign key, it does not use mappedBy. The mappedBy attribute is used only on the inverse side, which is typically the @OneToMany side.
+
+4.  Non owning side -> (since it doesn't containing foreign key of another entity)
+5.  Owning Side -> which containing foreign key of another entity.
+6. Make repositories for database operations.
+7. Make DTO's (Data Transfer objects) so that when controller call services then it should pass these DTO's to that service as DTO;'s will store incoming data from request.
+8. Model Mapping is used to map entity to dto's and vice versa.
+   Ex :- ModelMapper modelMapper = new ModelMapper();
+         OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+
+9. Between Controller and Services layer -> Dto objects will be exchanged for data.
+10. Between Services and Database / DAO layer -> Enitity objects will be exchanged for data.
+11. Use this standarad to create API end points :- /api/v1/courses
+12. REST :-- stateless,client server communication usually HTTP.
+          - Everything in rest api is considered as resource.
+          - Each resource is identified by its URI.
+          - Naming conventions :- Use nouns to represent resources not the verbs. (/users rather than /getUsers)
+                                  Use plural names for resources (/users instead of /user)
+                                  keep Url simple and intuitive.
+          - Versioning :- Version your Api using the url. (/v1/users) or using headers
+                          This helps in managing updates and maintaining backward compatibility.
+          - Stateless :- Each Api call should contain all the information required the server needs to fullfill the request.
+                         The server doesn't store any session information between request.
+
+====================================================================================================================================================
+
+
+1. PageRequest.of(pageNumber, pageSize) :-
+       -  PageRequest is a class provided by Spring Data JPA that implements the Pageable interface. It is used to request a specific page of data from the database with a defined page size.
+       -  pageNumber: This is the page number (starting from 0) you want to fetch. If pageNumber = 0, it refers to the first page, pageNumber = 1 refers to the second page, and so on.
+       -  pageSize: This is the number of records you want to display on each page. For example, if pageSize = 10, only 10 Category records will be fetched per page.
+
+       - findAll(pageRequest) is a method in JpaRepository that allows you to retrieve data with pagination. By passing the pageRequest, Spring Data JPA understands that you want a specific page of results (determined by pageNumber and pageSize).
+         findAll(pageRequest) -> This method returns a Page<Category> object, which contains:
+             a. The content of the page (the actual list of Category entities for the requested page).
+             b. Metadata about the pagination (total number of pages, total number of records, current page number, isLast,etc.).
+       - The getContent() method retrieves the actual data from the Page object. In this case, it returns a List<Category> containing the Category entities for the current page.
+
+2. Sorting:
+      - For achieving sorting based on specific data member, we have a class called Sort which could be passed in PageRequest.of(pageNumber, pageSize,sort) function to receive page object based on our sorting criteria.
+      - The Sort.by("fields") static method is used to create a sorting object in Spring Data JPA.
+      - sort.ascending() / sort.descending() to sort the data.
+
+(By combining both, you can efficiently retrieve a specific page of data that is also sorted by a particular field.)
+
+3. Bean Validation is a powerful validation framework in spring that helps ensure the integrity of your data by applying constraints to your model / DTO classes.
+4. It can be used in standalone Java applications or integrated into frameworks like Spring. With annotations like @NotEmpty(), @NotNull, @Size, @Email, etc., you can enforce validation rules on fields, and the validation process can be triggered programmatically or automatically by frameworks like Spring Boot.
+5. We need to include dependency for this bean validation library :- "spring-boot-starter-validation"
+6. We can use annotations to validate the DTO classes data members which are holding data from client request in order to validate the request parameters.
+7. @Valid annotation should be used to validate DTO object wherever calling / using.
+    Example in controller:-  @PostMapping
+                             public ResponseEntity<CategoryDto> create(@Valid @RequestBody CategoryDto categoryDto){...}
+    Purpose of @Valid:-
+    - Trigger Validation: When you annotate a method parameter, typically an object (like a DTO or a model class), with @Valid, it triggers the validation process for that object based on the constraints defined on its fields (e.g., @NotNull, @Size, @Email, etc.).
+    - Automatic Validation: It integrates with the Bean Validation API (JSR 303/JSR 380), so you don’t have to manually validate objects. Spring will automatically trigger validation for you when @Valid is used.
+
+    Common Use Cases of @Valid:
+    - It is often used in controller methods where you need to validate a request body or request parameters.
+    - When you receive a DTO (Data Transfer Object) or a form object in a request, annotating it with @Valid ensures that the data is validated before the controller method proceeds.
+    - In Spring Boot applications, @Valid is used with request bodies in REST APIs, ensuring that the incoming data (usually from a JSON payload) meets the required validation constraints.
+    - Validation errors are automatically handled by Spring, or you can catch / customize error handling with @ExceptionHandler or @ControllerAdvice.
+
+8. "?" is used in case we don;t able to decide which data type to return. Ex:- public ResponseEntity<?> create(@Valid @RequestBody CategoryDto categoryDto, BindingResult result){...}
+9. BindingResult is used to capture validation errors in the controllers so that we can return response according based on that.
+10. But it is not good practice to capture each validation result in BindingResult and check in controller itself that whether it hasErrors() or not. Because then we need to do for each controller methods. We need a way to handle it at one place where it could be applied for all controllers. And we know that place is "GlobalExceptionHandler" class.
+11. "GlobalExceptionHandler" class could be used to capture / catch validation exception (MethodArgumentNotValidException) and return suitable error response.
+     Ex :-     @ExceptionHandler(MethodArgumentNotValidException.class)
+               public ResponseEntity<Map<String,String>> handleValidationError(MethodArgumentNotValidException ex){
+                   Map<String,String> errorMap = new HashMap<>();
+                   ex.getBindingResult().getAllErrors().forEach(objectError -> {
+                       String fieldName = ((FieldError)objectError).getField();
+                       String errorMessage = objectError.getDefaultMessage();
+
+                       errorMap.put(fieldName,errorMessage);
+                   });
+
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
+               }
+12. FieldError: Represents errors related to a specific field of an object in spring validation framework.
+13. GlobalError (or ObjectError): Represents errors related to the entire object in spring validation framework.
+
+
