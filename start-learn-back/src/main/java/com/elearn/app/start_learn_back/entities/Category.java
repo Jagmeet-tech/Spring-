@@ -79,6 +79,20 @@ public class Category {
 
     private Date addedDate;
 
-    @ManyToMany(mappedBy = "categoryList")
+    @ManyToMany(mappedBy = "categoryList",cascade = CascadeType.ALL)
     private List<Course> courses = new ArrayList<>();
+
+
+    // nested resource
+    public void addCourse(Course course){
+        //Since we are handling bidirectional mapping , so when we are adding course inside a "category" entity,  then we need to take care of adding catgeory to that "course" entity as well.
+        // (so that we fetch related entities info. through whichever entity we have).
+        this.courses.add(course);
+        course.getCategoryList().add(this);     // bidirectional mapping.
+    }
+
+    public void removeCourse(Course course){
+        this.courses.remove(course);
+        course.getCategoryList().remove(this);  // bidirectional mapping
+    }
 }

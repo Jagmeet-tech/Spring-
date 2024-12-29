@@ -2,19 +2,25 @@ package com.elearn.app.start_learn_back.services;
 
 import com.elearn.app.start_learn_back.dtos.CourseDto;
 import com.elearn.app.start_learn_back.entities.Course;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public interface CourseService {
 
-    CourseDto create(CourseDto courseDto);
+    CourseDto createCourse(CourseDto courseDto);
 
-    List<CourseDto> getAll();
+    CourseDto updateCourse(String id,CourseDto courseDto);
 
-    CourseDto update(CourseDto courseDto,String courseId);
+    CourseDto getCourseById(String id);
 
-    void delete(String courseId);
+    Page<CourseDto> getAllCourses(Pageable pageable);
 
-    List<CourseDto> searchByTitle(String titleKeyword);
+    void deleteCourse(String id);
+
+    List<CourseDto> searchCourses(String keyword);
+
+//    List<CourseDto> searchByTitle(String titleKeyword);
 }

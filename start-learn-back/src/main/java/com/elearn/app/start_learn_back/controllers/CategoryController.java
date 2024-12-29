@@ -1,9 +1,7 @@
 package com.elearn.app.start_learn_back.controllers;
 
 import com.elearn.app.start_learn_back.config.AppConstants;
-import com.elearn.app.start_learn_back.dtos.CategoryDto;
-import com.elearn.app.start_learn_back.dtos.CustomMessage;
-import com.elearn.app.start_learn_back.dtos.CustomPageResponse;
+import com.elearn.app.start_learn_back.dtos.*;
 import com.elearn.app.start_learn_back.entities.Category;
 import com.elearn.app.start_learn_back.services.CategoryService;
 import jakarta.validation.Valid;
@@ -75,6 +73,32 @@ public class CategoryController {
     public ResponseEntity<CategoryDto> update(@PathVariable("categoryId") String categoryId,@RequestBody CategoryDto categoryDto){
         CategoryDto updatedCategoryDto = categoryService.update(categoryDto,categoryId);
         return ResponseEntity.status(HttpStatus.OK).body(updatedCategoryDto);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CategoryDto>> searchVideos(@RequestParam String keyword){
+        return ResponseEntity.ok(categoryService.searchVideos(keyword));
+    }
+
+    //nested resource
+    @PostMapping("/{categoryId}/courses/{courseId}")
+    public ResponseEntity<CustomMessage> addCourseToCategory(
+        @PathVariable String categoryId,
+        @PathVariable String courseId
+    ){
+        categoryService.addCourseToCategory(categoryId,courseId);
+        CustomMessage customMessage = new CustomMessage();
+        customMessage.setMessage("Course has been added to category !!!");
+        customMessage.setSuccess(true);
+
+        return ResponseEntity.ok(customMessage);
+    }
+
+    @GetMapping("/{categoryId}/courses")    // to fetch all courses related to the catgeory.
+    public ResponseEntity<List<CourseDto>> getCoursesOfCategory(
+            @PathVariable String categoryId
+    ){
+        return ResponseEntity.ok(categoryService.getCoursesOfCat(categoryId));
     }
 
 }

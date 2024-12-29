@@ -14,4 +14,6 @@ public interface VideoRepo extends JpaRepository<Video,String> {
     Optional<Video> findByTitle(String title);
 
     List<Video> findByCourse(Course course);
+
+    List<Video> findByTitleContainingIgnoreCaseOrDescContainingIgnoreCase(String title,String desc);
 }

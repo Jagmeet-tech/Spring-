@@ -1,7 +1,9 @@
 package com.elearn.app.start_learn_back.services;
 
 import com.elearn.app.start_learn_back.dtos.CategoryDto;
+import com.elearn.app.start_learn_back.dtos.CourseDto;
 import com.elearn.app.start_learn_back.dtos.CustomPageResponse;
+import com.elearn.app.start_learn_back.dtos.VideoDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,4 +22,9 @@ public interface CategoryService {
     CategoryDto update(CategoryDto categoryDto,String categoryId);
 
     //search
+    List<CategoryDto> searchVideos(String keyword);
+
+    public void addCourseToCategory(String catId,String courseId);
+
+    List<CourseDto> getCoursesOfCat(String categoryId);
 }

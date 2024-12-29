@@ -29,7 +29,7 @@ Notes -3 :- (Part 2 is covered in jpa project and Part 1 covered in mvc project 
                          The server doesn't store any session information between request.
 
 ====================================================================================================================================================
-
+Notes MVC :- 4
 
 1. PageRequest.of(pageNumber, pageSize) :-
        -  PageRequest is a class provided by Spring Data JPA that implements the Pageable interface. It is used to request a specific page of data from the database with a defined page size.
@@ -85,4 +85,49 @@ Notes -3 :- (Part 2 is covered in jpa project and Part 1 covered in mvc project 
 12. FieldError: Represents errors related to a specific field of an object in spring validation framework.
 13. GlobalError (or ObjectError): Represents errors related to the entire object in spring validation framework.
 
+=================================================================================================================================================================================================================
 
+Notes MVC :- 5
+
+1. findAll(Pageable pageable) :- this method signature takes Pageable as argument. But earlier we have passed here PageRequest (previous class)  as PageRequest is subclass of Pageable . SO we can pass either of that as argument in findAll() function.
+2. Without need to create seperate Dto for CustomPageResponse (which we created in previous class), we can use existing PageImpl<> class as well for response.
+3. PageImpl :-
+   - When using Spring Data JPA, the PageImpl class is used implicitly when you return a Page<T> from a repository method. Here is an example where pagination is applied using a repository.
+   - PageImpl is a concrete implementation of the Page interface in Spring Data, used to represent a page of data in a paginated query result.
+   - It contains the data for the current page, pagination metadata like the total number of elements, the current page, and the page size.
+   - It's most commonly used in Spring Data repositories when performing paginated queries.
+   - It provides useful methods like getContent(), getTotalPages(), and hasNext() to easily work with paginated data.
+
+4. Passing a Pageable object in a GET method of a controller in Spring allows you to implement pagination for API endpoints easily. Spring automatically binds query parameters like page, size, and sort to the Pageable object, which can then be passed to the service layer to fetch a paginated result. This improves performance, enhances user experience, and simplifies the code.
+5. Creating Nested Resource API :-
+    - Creating a nested resource API means designing an API where resources are related to each other, and one resource exists as part of another resource. For instance, consider a scenario where you have two resources: Course and Student. A Course can have multiple Students, so Students can be viewed as a nested resource under a specific Course.
+    - When designing an API with nested resources, you typically create endpoints that allow operations on the related resources. These endpoints are structured to reflect the relationships between the resources.
+    - Ex :- categories/{categoryId}/courses/{courseId}   -> Meaning particular catgeoryId ke andar jo courses hai usmein specific courseId get/update krdo.  (nested as we are accessing nested resource)
+    - Depending on bidirectional / unidirectional mapping and relationships, we can write nested resource api like which entities would able to expose which nested entity.
+    - Since we are handling bidirectional mapping , so when we are adding course inside a "category" entity,  then we need to take care of adding catgeory to that "course" entity as well. (so that we fetch related entities info. through whichever entity we have).
+    - CascadeType.ALL is a convenient way to automatically propagate all CRUD operations (persist, merge, remove, etc.) from a parent entity to its associated child entities.
+    - CascadeType.ALL simplifies code and ensures data consistency, be mindful of the potential for unintended data loss or performance problems, especially when deleting or persisting large object graphs. Use it carefully based on the specific requirements of your application.
+    - The error message "could not initialize proxy - no session" is a common issue encountered in Hibernate or JPA applications. It typically occurs when you're trying to access a lazy-loaded relationship outside of a valid Hibernate session (e.g., after the session is closed or when there is no active transaction).
+      Understanding the issue:- (by default lazy load of entity)
+            i. In Hibernate, entities with lazy loading are not fully loaded from the database when the parent entity is fetched. Instead, they are proxied. This means that the related entities (for example, collections or single associations) are not retrieved immediately but are only fetched when they are accessed for the first time (on-demand), a behavior known as lazy loading.
+               However, the proxy can only be initialized if there is an active session that can fetch the actual data from the database. If the session is closed or if you're outside the transaction context, Hibernate cannot initialize the proxy, leading to the "could not initialize proxy - no session" error.
+            ii. Common Scenarios for This Error:
+                Lazy Loading After Session is Closed: You may have fetched an entity within a session (like inside a service method), but then try to access its lazy-loaded properties after the session has been closed.
+                Ex:- @Transactional
+                     public void exampleMethod() {
+                         Course course = courseRepository.findById(1L).orElseThrow();
+                         // Some other code...
+                     }
+                     // After the session has been closed, trying to access course.getStudents() will result in the error.
+            iii. Solution :-  a.)Eager Fetching: You can fetch the related entities eagerly instead of lazily. This forces Hibernate to load the related entities immediately, so you don't face the issue when accessing them later.
+                                 In your entity, change the relationship from lazy loading (FetchType.LAZY) to eager loading (FetchType.EAGER).
+                                 Ex :- @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
+                                       private List<Student> students;
+                              b.) Use @Transactional:- Ensure that the code where you access the lazy-loaded entities is wrapped in a transaction. In Spring, the @Transactional annotation ensures that the session is open and active during the method execution. (try to maintain db session active)
+                                 Ex:- @Transactional
+                                      public void exampleMethod() {
+                                          Course course = courseRepository.findById(1L).orElseThrow();
+                                          List<Student> students = course.getStudents();  // Will work as session is still open
+                                      }
+
+      - In Dto's of related entites, always show another entity in one dto only to avoid infinite fetch of enities. (ex:- Course ke andar category and category ke andar course, as it will cause infinite circle of fetching entities.)

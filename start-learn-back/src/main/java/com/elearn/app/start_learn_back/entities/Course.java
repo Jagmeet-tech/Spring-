@@ -129,4 +129,15 @@ public class Course {
     @ManyToMany
     private List<Category> categoryList = new ArrayList<>();
 
+
+    // nested resource
+    public void addCategory(Category category){
+        this.categoryList.add(category);
+        category.getCourses().add(this);    // bidirectional mapping
+    }
+
+    public void removeCategory(Category category){
+        this.categoryList.remove(category);
+        category.getCourses().remove(this); // bidirectional mapping
+    }
 }
