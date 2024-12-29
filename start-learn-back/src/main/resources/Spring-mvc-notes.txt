@@ -131,3 +131,145 @@ Notes MVC :- 5
                                       }
 
       - In Dto's of related entites, always show another entity in one dto only to avoid infinite fetch of enities. (ex:- Course ke andar category and category ke andar course, as it will cause infinite circle of fetching entities.)
+
+=================================================================================================================================================================================
+Notes MVC :- 6
+
+1. Image upload :-
+      - file (img,video,audio,pdf) fetch in server
+      - file information (meta data) can get.
+      - actual file content read (InputStream class to read data of a file.)
+      - save -> folder / db / AWS / cloudinary
+      - meta data save (khud ke db mein , not the actual file)
+      - MultipartFile allows you to handle file uploads in web applications, where users can send files (such as images, documents, etc.) to the server as part of a web form. You can receive as @ReuestParam annotation in controller.
+              a. It provides methods to read and access the content of the uploaded file, such as its original name, size, content type, and the actual file data.
+              b. After receiving the file as a MultipartFile, you can process it and store it on your file system, in a database, or in cloud storage.
+      - Path represents a file or directory location and provides various methods to manipulate and interact with file system paths.
+      - Paths is a utility class that provides methods to create instances of Path
+      - Together, these classes offer a more modern, flexible, and efficient way of handling file system paths compared to the older File class in Java.
+      - They are especially useful in modern Java applications for tasks like file manipulation, file system interaction, and reading/writing files efficiently.
+
+      - To return image as response , consider return type ResponseEntity<Resource>.
+      - The Resource interface is a key abstraction in Spring for accessing different types of resources (file system, classpath, URL, etc.). It provides a common set of methods for checking existence, reading content, and handling resources, making it easier to work with various types of resources in a consistent way.
+      - Common implementations of the Resource interface include ClassPathResource, FileSystemResource, UrlResource, InputStreamResource, and others.
+      - # Maximum file size for uploads (e.g., 10 MB)
+        spring.servlet.multipart.max-file-size=10MB
+
+      - # Maximum request size (total size including file data and other form data)
+        spring.servlet.multipart.max-request-size=10MB
+
+      - You can also create custom annotation for validation of image:-
+            a. Create Custom Annotation: Define a custom annotation (@ValidImage) using @Constraint and link it to a validator class.
+                                         Ex :- @Constraint(validatedBy = ImageValidator.class)
+                                               @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
+                                               @Retention(RUNTIME)
+                                               public @interface ValidImage {
+                                                   String message() default "Invalid image file";
+                                                   Class<?>[] groups() default {};
+                                                   Class<? extends Payload>[] payload() default {};
+                                               }
+            b. Create Validator Class:- Implement the validation logic in a class (ImageValidator) that checks if the uploaded file is an image (e.g., based on file extension or MIME type).
+                                        Ex :- public class ImageValidator implements ConstraintValidator<ValidImage, MultipartFile> {
+                                                  @Override
+                                                  public boolean isValid(MultipartFile file, ConstraintValidatorContext context) {
+                                                      // Check file type or extension
+                                                      return file.getOriginalFilename().matches(".*\\.(jpg|jpeg|png|gif|bmp)$");
+                                                  }
+                                              }
+            c. Apply Annotation in Model:- Use the @ValidImage annotation on fields (like MultipartFile) in your DTO or model class to trigger validation.
+                                         Ex:- public class FileUploadDto {
+                                                  @ValidImage(message = "Please upload a valid image file.")
+                                                  private MultipartFile file;
+                                              }
+            d. Controller Validation:- In your controller, use @Valid to trigger validation and BindingResult to capture validation errors.
+                                         Ex:- @PostMapping("/upload")
+                                              public String uploadImage(@Valid @RequestBody FileUploadDto fileUploadDto, BindingResult bindingResult) {
+                                                  if (bindingResult.hasErrors()) {
+                                                      return bindingResult.getAllErrors().get(0).getDefaultMessage();
+                                                  }
+                                                  // Further processing
+                                                  return "File uploaded successfully!";
+                                              }
+
+            e. Handle Errors:- Customize error messages and handle the validation result accordingly in the controller.
+            (This approach provides a clean, reusable way to validate image files in your Spring application.)
+
+2. You can get request object information thorugh HttpServletRequest class injecting in controller parameter.
+3. HttpServletRequest is an interface provided by the Servlet API in Java, and it is commonly used in web applications (like Spring-based applications) to represent an HTTP request made by a client (such as a web browser). It provides various methods for interacting with the incoming request data, including headers, parameters, session, and more.
+     - Access HTTP request parameters, headers, and body content.
+     - Work with client data such as IP address and cookies.
+     - Handle session management.
+     - Process multipart file uploads and more.
+   (In Spring MVC, HttpServletRequest is automatically injected into controller methods, allowing easy access to the request information.)
+
+4. Similarly we have HttpServletResponse methods of J2EE.
+5. @RequestHeader is used to bind request header values to method parameters in a Spring controller.ou can specify a header name as a parameter to extract its value.
+6. @CrossOrigin is an annotation in Spring that is used to enable Cross-Origin Resource Sharing (CORS) for a controller or specific handler method. CORS is a mechanism that allows a web application running at one origin (domain) to make requests for resources hosted on another origin (domain). It is particularly useful when you have a frontend and backend that are served from different origins, such as a frontend on http://localhost:3000 and a backend API on http://localhost:8080.
+   By using @CrossOrigin, you allow your Spring-based application to respond to HTTP requests made from different origins, domains, or ports. This is important for enabling the interaction between web applications and APIs across different servers.
+   Ex :- @RestController
+         @CrossOrigin(origins = "http://localhost:3000")  // Allow requests from this origin
+         public class MyController {
+
+             @GetMapping("/api/data")
+             public String getData() {
+                 return "This is data from the backend.";
+             }
+         }
+
+   Ex :- @RestController
+         public class MyController {
+
+             @CrossOrigin(origins = "http://localhost:3000")
+             @GetMapping("/api/specific-data")
+             public String getSpecificData() {
+                 return "This data is available for a specific method.";
+             }
+         }
+
+7. @ResponseStatus annotation is a useful tool in Spring to automatically set HTTP status codes for responses.
+8. In Spring (and more broadly, with Jackson, which is used by default for JSON serialization/deserialization in Spring), @JsonProperty and @JsonIgnore are annotations that control how Java objects are serialized into JSON and deserialized back into Java objects.
+  - The @JsonProperty annotation is used to specify how a Java object property should be represented in JSON. This annotation allows you to define the name of the JSON property that should be mapped to a particular Java field, and it can also help with deserialization and serialization customization.
+          a. Rename a Java field during serialization/deserialization.
+          b. Indicate that a field should be included in the JSON output (even if it might be excluded by default).
+          c. Control the ordering of JSON properties.
+             Ex :- import com.fasterxml.jackson.annotation.JsonProperty;
+
+                   public class User {
+
+                       @JsonProperty("username")  // Renames the Java field to "username" in the JSON
+                       private String name;
+
+                       @JsonProperty("email_address")  // Renames the Java field to "email_address" in the JSON
+                       private String email;
+
+                       // Getters and setters
+                   }
+
+  - The @JsonIgnore annotation is used to exclude a property from being included in the JSON serialization (i.e., the field will be ignored when converting the Java object to JSON) and from being deserialized back into the Java object (i.e., the field is ignored when parsing the JSON back into the Java object).
+         a. To exclude sensitive data (e.g., password fields) from being exposed in the JSON response.
+         b. To avoid serializing fields that are not necessary to include in the response.
+         c. To prevent circular references between objects.
+
+         Ex:-  import com.fasterxml.jackson.annotation.JsonIgnore;
+
+               public class User {
+
+                   private String name;
+
+                   @JsonIgnore  // This field will be ignored during serialization and deserialization
+                   private String password;
+
+                   // Getters and setters
+               }
+
+9. The @JsonFormat annotation in Jackson (the default JSON library in Spring) is used to customize the serialization and deserialization of date/time values. It allows you to control the format of dates, times, numbers, and other types during the process of converting a Java object to JSON or vice versa.
+     a. Formatting date/time values: You can specify how dates and times should appear in the serialized JSON (e.g., changing the default ISO format to a custom date format).
+     b. Formatting numeric values: You can define how numeric values should be formatted.
+     c. Controlling the time zone: You can specify a specific time zone when formatting dates or times.
+     Ex:- @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+          private LocalDate dateOfBirth;
+
+10. Use this @Json annotations mentioned above in  DTO / model classes only .(Don't use it in entity classes. )
+
+
+

@@ -1,5 +1,7 @@
 package com.elearn.app.start_learn_back.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -107,11 +109,21 @@ public class CourseDto {
         this.categoryList = categoryList;
     }
 
+//    @JsonIgnore
+//    @JsonProperty("long_description")
     private String longDesc;
 
     private double price;
 
     private boolean live = false;
+
+    public String getBannerContentType() {
+        return bannerContentType;
+    }
+
+    public void setBannerContentType(String bannerContentType) {
+        this.bannerContentType = bannerContentType;
+    }
 
     private double discount;
 
@@ -119,9 +131,15 @@ public class CourseDto {
 
     private String banner;
 
+    private String bannerContentType;
+
     //videos
     private List<VideoDto> videos = new ArrayList<>();
 
     //categories
     private List<CategoryDto> categoryList = new ArrayList<>();
+
+    public String getBannerUrl(){
+        return "http://localhost:8080/api/v1/courses/" + this.id + "/banners";
+    }
 }

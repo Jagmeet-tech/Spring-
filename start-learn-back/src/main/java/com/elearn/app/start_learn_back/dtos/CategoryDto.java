@@ -1,6 +1,7 @@
 package com.elearn.app.start_learn_back.dtos;
 
 import com.elearn.app.start_learn_back.entities.Course;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -72,5 +73,7 @@ public class CategoryDto {
 //    @Pattern(regexp = "") could be used for email property.
     private String desc;
 
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy--MM--dd hh:mm:ss a",timezone = "IST")
     private Date addedDate;
 }

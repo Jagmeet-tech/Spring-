@@ -119,7 +119,18 @@ public class Course {
 
     private Date createdDate;
 
+    public String getBannerContentType() {
+        return bannerContentType;
+    }
+
+    public void setBannerContentType(String bannerContentType) {
+        this.bannerContentType = bannerContentType;
+    }
+
+    //image field
     private String banner;
+
+    private String bannerContentType;
 
     //videos
     @OneToMany(mappedBy = "course")
